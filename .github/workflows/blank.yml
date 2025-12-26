@@ -1,0 +1,40 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare project folder
+        run: |
+          rm -rf SafetySupervisorProject
+          mkdir -p SafetySupervisorProject
+
+      - name: Unzip project into folder
+        run: unzip -o SafetySupervisorApp_v1.zip -d SafetySupervisorProject
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - name: Build Debug APK
+        run: |
+          cd SafetySupervisorProject
+          chmod +x ./gradlew
+          ./gradlew assembleDebug
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: SafetySupervisor-APK
+          path: SafetySupervisorProject/app/build/outputs/apk/debug/*.apk
